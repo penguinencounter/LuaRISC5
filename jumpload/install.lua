@@ -1,6 +1,6 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=6@
+--@VERSION=7@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -9,7 +9,7 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 6,  -- ENSURE THIS MATCHES THE HEADER
+    version = 7,  -- ENSURE THIS MATCHES THE HEADER
 
     sources = {
         main = "https://penguinencounter.github.io/LuaRISC5/jumpload/jumpload.lua"
@@ -84,7 +84,7 @@ local function check_version()
         if fs.attributes(self_path).isReadOnly then
             color_write("can't write; running live\n", colors.yellow)
             shell.run(path)
-            color_write("cleaning up temporaries", colors.yellow)
+            color_write("cleaning up temporaries\n", colors.yellow)
             fs.delete(path)
             return false, ""
         else
@@ -111,5 +111,5 @@ end
 
 
 local function install()
-    local content = 
+    local content = "WIP"
 end
