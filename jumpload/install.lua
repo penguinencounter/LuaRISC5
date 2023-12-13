@@ -1,15 +1,15 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=4@
+--@VERSION=6@
 
 local Installer = {
-    selfref = "https://raw.githubusercontent.com/penguinencounter/LuaRISC5/main/jumpload/install.lua",
+    selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
     http_headers = {
         ["Cache-Control"] = "no-cache",
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 4,  -- ENSURE THIS MATCHES THE HEADER
+    version = 6,  -- ENSURE THIS MATCHES THE HEADER
 }
 
 ---Write text with a color.
