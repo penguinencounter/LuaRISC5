@@ -1,16 +1,17 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=1@
+--@VERSION=2@
 
 local Installer = {
     selfref = "https://raw.githubusercontent.com/penguinencounter/LuaRISC5/main/jumpload/install.lua",
-    version = 1,  -- ENSURE THIS MATCHES THE HEADER
+    version = 2,  -- ENSURE THIS MATCHES THE HEADER
 }
 if not http then
     -- http might be disabled
     io.stderr:write("This installer requires network access.\n")
     io.stderr:write("If you have server file access, check the ComputerCraft configuration\n")
     io.stderr:write("to enable HTTP.\n")
+    io.stderr:write("If you don't have server file access, get a portable installer.\n")
     return 1
 end
 
@@ -19,7 +20,10 @@ end
 ---@return boolean
 ---@return string
 local function get(url)
-    local resp = http.get(url)
+    local resp = http.get {
+        url = url,
+        binary = true
+    }
     if resp then
         local data = resp.readAll()
         resp.close()
@@ -30,6 +34,9 @@ local function get(url)
     end
 end
 
+---Check if this version of the installer is current.
+---@return boolean current should we continue running?
+---@return string message what message should be displayed?
 local function check_version()
     local ok, installfile = get(Installer.selfref)
     if not ok then
@@ -37,16 +44,35 @@ local function check_version()
     end
     local version_no = installfile:match("%-%-@VERSION=(%d+)@")
     if tonumber(version_no) > Installer.version then
-        io.write("Downloading a new installer...")
+        io.write("Downloading installer upgrade...\n")
         local n = 0
         while fs.exists("/.tmp" .. tostring(n) .. ".lua") do
             n = n + 1
         end
         local path = "/.tmp" .. tostring(n) .. ".lua"
-        local handle = fs.open(path, "w")
-        
+        local handle = fs.open(path, "wb")
+        if not handle then
+            error("couldn't open temporary file for writing", 0)
+        end
+        handle.write(installfile)
+        handle.close()
+        io.write()
+
+        io.write("Replacing...\n")
+        local self_path = shell.getRunningProgram()
+        fs.delete(self_path)
+        fs.copy(path, self_path)
+        fs.delete(path)
+        io.write("Starting new installer.\n")
+        shell.run(self_path)
+        return false, ""
     end
+    return true, ""
 end
 
 
-local update = check_version()
+local uptodate, msg = check_version()
+if not uptodate then
+    io.stderr:write(msg .. "\n")
+    return
+end
