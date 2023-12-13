@@ -1,11 +1,22 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=2@
+--@VERSION=3@
 
 local Installer = {
     selfref = "https://raw.githubusercontent.com/penguinencounter/LuaRISC5/main/jumpload/install.lua",
-    version = 2,  -- ENSURE THIS MATCHES THE HEADER
+    version = 3,  -- ENSURE THIS MATCHES THE HEADER
 }
+
+---Write text with a color.
+---@param text string
+---@param color integer
+local function color_write(text, color)
+    local r = term.getTextColor()
+    term.setTextColor(color)
+    io.write(text)
+    term.setTextColor(r)
+end
+
 if not http then
     -- http might be disabled
     io.stderr:write("This installer requires network access.\n")
@@ -71,8 +82,11 @@ local function check_version()
 end
 
 
+color_write("Checking for installer updates...", colors.lightBlue)
 local uptodate, msg = check_version()
 if not uptodate then
     io.stderr:write(msg .. "\n")
     return
+else
+    color_write("Installer looks OK!", colors.lime)
 end
