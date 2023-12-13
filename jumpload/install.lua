@@ -1,6 +1,6 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=9@
+--@VERSION=10@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -9,7 +9,7 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 9,  -- ENSURE THIS MATCHES THE HEADER
+    version = 10,  -- ENSURE THIS MATCHES THE HEADER
     output_name = "jumpload.lua",
 
     sources = {
@@ -112,7 +112,7 @@ if not uptodate then
     io.stderr:write(msg .. "\n")
     return
 else
-    color_write("looks OK!", colors.lime)
+    color_write("looks OK!\n", colors.lime)
 end
 
 
