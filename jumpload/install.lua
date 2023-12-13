@@ -10,6 +10,10 @@ local Installer = {
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
     version = 6,  -- ENSURE THIS MATCHES THE HEADER
+
+    sources = {
+        main = "https://penguinencounter.github.io/LuaRISC5/jumpload/jumpload.lua"
+    }
 }
 
 ---Write text with a color.
@@ -75,14 +79,22 @@ local function check_version()
         handle.close()
         io.write()
 
-        color_write("Replacing...\n", colors.red)
+        color_write("Replacing... ", colors.green)
         local self_path = shell.getRunningProgram()
-        fs.delete(self_path)
-        fs.copy(path, self_path)
-        fs.delete(path)
-        color_write("Starting new installer.\n", colors.green)
-        shell.run(self_path)
-        return false, ""
+        if fs.attributes(self_path).isReadOnly then
+            color_write("can't write; running live\n", colors.yellow)
+            shell.run(path)
+            color_write("cleaning up temporaries", colors.yellow)
+            fs.delete(path)
+            return false, ""
+        else
+            fs.delete(self_path)
+            fs.copy(path, self_path)
+            fs.delete(path)
+            color_write("Starting new installer.\n", colors.green)
+            shell.run(self_path)
+            return false, ""
+        end
     end
     return true, ""
 end
@@ -95,4 +107,9 @@ if not uptodate then
     return
 else
     color_write("looks OK!", colors.lime)
+end
+
+
+local function install()
+    local content = 
 end
