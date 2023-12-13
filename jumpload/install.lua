@@ -1,6 +1,6 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=8@
+--@VERSION=9@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -9,7 +9,7 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 8,  -- ENSURE THIS MATCHES THE HEADER
+    version = 9,  -- ENSURE THIS MATCHES THE HEADER
     output_name = "jumpload.lua",
 
     sources = {
@@ -166,7 +166,10 @@ local function install()
         end
     end
 
-    local to_install = get(Installer.sources.main .. "?" .. Installer.refresh_tac)
+    local req_ok, to_install = get(Installer.sources.main .. "?" .. Installer.refresh_tac)
+    if not req_ok then
+        error("download failed", 0)
+    end
     -- number of exclamation points (!)
     local screaming = 1
     for _, name in ipairs(fs.list("/startup")) do
