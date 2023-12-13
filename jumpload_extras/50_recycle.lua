@@ -28,7 +28,7 @@ _G.fs.delete = function(path)
             filename = "_" .. filename
         end
         fs.copy(path, "/trash/" .. filename)
-        color_write("Moved " .. path .. " to trash as " .. filename .. "\n", colors.lightGray)
+        color_write("Trashed " .. filename .. " as " .. filename .. "\n", colors.lightGray)
     end
     originals.delete(path)
 end
