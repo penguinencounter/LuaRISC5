@@ -4,6 +4,7 @@
 
 local Installer = {
     selfref = "https://raw.githubusercontent.com/penguinencounter/LuaRISC5/main/jumpload/install.lua",
+    refresh_tac = math.floor(os.time("utc") * 60 * 60),
     version = 3,  -- ENSURE THIS MATCHES THE HEADER
 }
 
@@ -49,7 +50,7 @@ end
 ---@return boolean current should we continue running?
 ---@return string message what message should be displayed?
 local function check_version()
-    local ok, installfile = get(Installer.selfref)
+    local ok, installfile = get(Installer.selfref .. "?" .. Installer.refresh_tac)
     if not ok then
         error("couldn't check for updates", 0)
     end
