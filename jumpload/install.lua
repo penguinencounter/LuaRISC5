@@ -4,6 +4,10 @@
 
 local Installer = {
     selfref = "https://raw.githubusercontent.com/penguinencounter/LuaRISC5/main/jumpload/install.lua",
+    http_headers = {
+        ["Cache-Control"] = "no-cache",
+        ["Pragma"] = "no-cache",
+    },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
     version = 4,  -- ENSURE THIS MATCHES THE HEADER
 }
