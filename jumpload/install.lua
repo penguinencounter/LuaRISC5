@@ -1,6 +1,6 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=7@
+--@VERSION=8@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -9,10 +9,15 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 7,  -- ENSURE THIS MATCHES THE HEADER
+    version = 8,  -- ENSURE THIS MATCHES THE HEADER
+    output_name = "jumpload.lua",
 
     sources = {
         main = "https://penguinencounter.github.io/LuaRISC5/jumpload/jumpload.lua"
+    },
+    d_to_create = {
+        "/.early_load",
+        "/startup"
     }
 }
 
@@ -42,7 +47,8 @@ end
 local function get(url)
     local resp = http.get {
         url = url,
-        binary = true
+        binary = true,
+        headers = Installer.http_headers
     }
     if resp then
         local data = resp.readAll()
@@ -111,5 +117,77 @@ end
 
 
 local function install()
-    local content = "WIP"
+    -- Backup existing startups
+    if fs.exists("/startup") and not fs.isDir("/startup") then
+        color_write("Moving existing startup, ", colors.yellow)
+        local oH = fs.open("/startup", "rb")
+        if oH then
+            local d = oH.readAll()
+            oH.close()
+            fs.delete("/startup")
+            fs.makeDir("/startup")
+            local wH = fs.open("/startup/30_startup", "wb")
+            if wH then
+                wH.write(d)
+                wH.close()
+                color_write("ok.\n", colors.lime)
+            else
+                color_write("failed to open output.\n", colors.red)
+            end
+        else
+            color_write("failed to open input.\n", colors.red)
+        end
+    end
+
+    if fs.exists("/startup.lua") and not fs.isDir("/startup.lua") then
+        color_write("Moving existing startup.lua, ", colors.yellow)
+        local oH = fs.open("/startup.lua", "rb")
+        if oH then
+            local d = oH.readAll()
+            oH.close()
+            fs.delete("/startup.lua")
+            fs.makeDir("/startup")
+            local wH = fs.open("/startup/31_startup.lua", "wb")
+            if wH then
+                wH.write(d)
+                wH.close()
+                color_write("ok.\n", colors.lime)
+            else
+                color_write("failed to open output.\n", colors.red)
+            end
+        else
+            color_write("failed to open input.\n", colors.red)
+        end
+    end
+
+    for _, item in ipairs(Installer.d_to_create) do
+        if not fs.exists(item) then
+            fs.makeDir(item)
+        end
+    end
+
+    local to_install = get(Installer.sources.main .. "?" .. Installer.refresh_tac)
+    -- number of exclamation points (!)
+    local screaming = 1
+    for _, name in ipairs(fs.list("/startup")) do
+        local this_sc = #name:match("^(!*)")
+        if this_sc + 1 > screaming then
+            screaming = this_sc + 1
+        end
+    end
+    local target_name = "/startup/" .. ("!"):rep(screaming) .. "_" .. Installer.output_name
+    if fs.exists(target_name) then
+        fs.delete(target_name)
+    end
+    local handl = fs.open(target_name, "wb")
+    if not handl then
+        error("could not open output file for writing", 0)
+    end
+    handl.write(to_install)
+    handl.close()
+    
+    color_write("Install success! ", colors.lime)
+    color_write("Restart to apply changes.\n", colors.yellow)
 end
+
+install()
