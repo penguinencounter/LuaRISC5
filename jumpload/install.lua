@@ -1,11 +1,11 @@
 
 -- computer readable metadata. do not remove.
---@VERSION=3@
+--@VERSION=4@
 
 local Installer = {
     selfref = "https://raw.githubusercontent.com/penguinencounter/LuaRISC5/main/jumpload/install.lua",
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 3,  -- ENSURE THIS MATCHES THE HEADER
+    version = 4,  -- ENSURE THIS MATCHES THE HEADER
 }
 
 ---Write text with a color.
@@ -56,7 +56,8 @@ local function check_version()
     end
     local version_no = installfile:match("%-%-@VERSION=(%d+)@")
     if tonumber(version_no) > Installer.version then
-        io.write("Downloading installer upgrade...\n")
+        color_write("out of date.\n", colors.orange)
+        color_write("Downloading installer upgrade...\n", colors.orange)
         local n = 0
         while fs.exists("/.tmp" .. tostring(n) .. ".lua") do
             n = n + 1
@@ -70,12 +71,12 @@ local function check_version()
         handle.close()
         io.write()
 
-        io.write("Replacing...\n")
+        color_write("Replacing...\n", colors.red)
         local self_path = shell.getRunningProgram()
         fs.delete(self_path)
         fs.copy(path, self_path)
         fs.delete(path)
-        io.write("Starting new installer.\n")
+        color_write("Starting new installer.\n", colors.green)
         shell.run(self_path)
         return false, ""
     end
@@ -83,11 +84,11 @@ local function check_version()
 end
 
 
-color_write("Checking for installer updates...", colors.lightBlue)
+color_write("Checking for installer updates... ", colors.lightBlue)
 local uptodate, msg = check_version()
 if not uptodate then
     io.stderr:write(msg .. "\n")
     return
 else
-    color_write("Installer looks OK!", colors.lime)
+    color_write("looks OK!", colors.lime)
 end
