@@ -17,7 +17,7 @@ local originals = {
 }
 
 local function is_trash(path)
-    return path:match("^/trash/") ~= nil
+    return shell.resolve(path):match("^trash/") ~= nil
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
