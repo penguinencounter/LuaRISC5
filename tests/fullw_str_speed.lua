@@ -14,3 +14,6 @@ for i = 1, 1000000 do
 end
 local done2 = os.clock()
 print("Warm writes:", done2 - start2, (done2 - start2) / (done - start), "pct")
+
+print(string.format("%20.0d", 2 ^ 64 - 1))
+print(string.format("%20.0d", 2 ^ 64 + 1))
