@@ -5,7 +5,7 @@ local bin32 = require "bin32"
 
 -- Instruction encoders decoders.
 
--- Test: 00000001110001011000010110010011 addi a1, a1, 28
+-- Test: 00000001110000001000000010010011 addi a1, a1, 28
 --       012345678901|rs1|   |rd-||instr| addi a1, a1, 28
 
 
@@ -24,6 +24,9 @@ local InstR = Instruction:new {
     rs2 = 0,
     funct7 = 0,
 }
+
+---@type InstNew<I.InstR>
+InstR.new = Instruction.new
 
 ---Decode an R-type instruction from a word.
 ---@param word integer
@@ -51,6 +54,9 @@ local InstI = Instruction:new {
     imm = 0,
 }
 
+---@type InstNew<I.InstI>
+InstI.new = Instruction.new
+
 ---Decode an I-type instruction from a word.
 ---@param word integer
 function InstI:decode(word)
@@ -75,6 +81,9 @@ local InstS = Instruction:new {
     rs1 = 0,
     rs2 = 0,
 }
+
+---@type InstNew<I.InstS>
+InstS.new = Instruction.new
 
 ---Decode an S-type instruction from a word.
 ---@param word integer
@@ -103,6 +112,9 @@ local InstB = Instruction:new {
     rs2 = 0,
 }
 
+---@type InstNew<I.InstB>
+InstB.new = Instruction.new
+
 ---Decode an B-type instruction from a word.
 ---@param word integer
 function InstB:decode(word)
@@ -129,6 +141,9 @@ local InstU = Instruction:new {
     imm = 0,
 }
 
+---@type InstNew<I.InstU>
+InstU.new = Instruction.new
+
 ---Decode an U-type instruction from a word.
 ---@param word integer
 function InstU:decode(word)
@@ -148,6 +163,9 @@ local InstJ = Instruction:new {
     imm = 0,
 }
 
+---@type InstNew<I.InstJ>
+InstJ.new = Instruction.new
+
 ---Decode an J-type instruction from a word.
 ---@param word integer
 function InstJ:decode(word)
@@ -160,3 +178,12 @@ function InstJ:decode(word)
     im = bits.lshift(im, 1) -- there is no low bit.
     self.imm = bin32.sext(im, 21)
 end
+
+return {
+    InstR = InstR,
+    InstI = InstI,
+    InstS = InstS,
+    InstB = InstB,
+    InstU = InstU,
+    InstJ = InstJ,
+}

@@ -2,6 +2,9 @@
 ---@field apply (fun(self: Instruction, state: State): nil)?
 ---@field decode (fun(self: Instruction, word: integer): Instruction?)?
 
+---@generic T: Instruction
+---@alias InstNew<T> fun(self: T, init: _PartialInstruction?): T
+
 ---@class Instruction
 local Instruction = {}
 
@@ -10,7 +13,7 @@ local Instruction = {}
 ---@return Instruction
 function Instruction:new(init)
     local o = init or {}
-    setmetatable(o, self)
+    o = setmetatable(o, self)
     self.__index = self
     return o --[[@as Instruction]]
 end

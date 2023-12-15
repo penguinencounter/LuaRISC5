@@ -31,3 +31,5 @@ local function _init()
 end
 
 local state = _init()
+
+return state

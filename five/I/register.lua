@@ -42,7 +42,7 @@ function IntRegister:write(value)
     elseif self.can_write == RegisterInteract.Throw then
         error("Attempt to write to read-only register")
     else
-        self.value = value
+        self.value = bin32.trim(value, 32)
     end
 end
 

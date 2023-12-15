@@ -23,5 +23,18 @@ function export.sext(value, inbound_size)
     end
 end
 
+function export.trim(value, size)
+    return c.bits.band(value, c.bits.lshift(1, size) - 1)
+end
+
+function export.twoc2real(value)
+    local sign_bit = c.bits.band(value, c.bits.lshift(1, 31))
+    if sign_bit == 0 then
+        return value
+    else
+        return c.bits.extract(value, 0, 31) - c.bits.lshift(1, 31)
+    end
+end
+
 
 return export
