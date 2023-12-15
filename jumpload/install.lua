@@ -1,5 +1,5 @@
 -- computer readable metadata. do not remove.
---@VERSION=12@
+--@VERSION=13@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -8,7 +8,7 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 12, -- ENSURE THIS MATCHES THE HEADER
+    version = 13, -- ENSURE THIS MATCHES THE HEADER
     output_name = "jumpload.lua",
     product_id = "jumpload_fd5e2d536aa8f095",
 
@@ -178,10 +178,11 @@ local function install()
     end
     local version = to_install:match("%-%-@VERSION=(%d+)@")
     if not version then
-        color_write("WARN: Incoming file has no version, assuming v0", colors.orange)
         version = 0
+        color_write("WARN: Incoming file has no version, assuming v0\n", colors.orange)
     else
         version = tonumber(version)
+        color_write("Incoming file is version " .. version .. "\n", colors.gray)
     end
 
     -- number of exclamation points (!)
