@@ -1,5 +1,5 @@
 -- computer readable metadata. do not remove.
---@VERSION=11@
+--@VERSION=12@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -8,7 +8,7 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 11, -- ENSURE THIS MATCHES THE HEADER
+    version = 12, -- ENSURE THIS MATCHES THE HEADER
     output_name = "jumpload.lua",
     product_id = "jumpload_fd5e2d536aa8f095",
 
@@ -204,6 +204,10 @@ local function install()
                     fs.delete(full_path)
                     do_upgrade = full_path
                     color_write("Upgrading " .. name .. ": v" .. exist_version .. " -> " .. version .. "\n", colors.lime)
+                elseif version == exist_version then
+                    color_write("The latest version is already installed\n", colors.yellow)
+                    fileh.close()
+                    return
                 end
             end
             fileh.close()
