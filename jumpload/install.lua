@@ -1,6 +1,5 @@
-
 -- computer readable metadata. do not remove.
---@VERSION=10@
+--@VERSION=11@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -9,8 +8,9 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 10,  -- ENSURE THIS MATCHES THE HEADER
+    version = 11, -- ENSURE THIS MATCHES THE HEADER
     output_name = "jumpload.lua",
+    product_id = "jumpload_fd5e2d536aa8f095",
 
     sources = {
         main = "https://penguinencounter.github.io/LuaRISC5/jumpload/jumpload.lua"
@@ -55,7 +55,7 @@ local function get(url)
         resp.close()
         return true, data or ""
     else
-        printError("failed to get "..url)
+        printError("failed to get " .. url)
         return false, ""
     end
 end
@@ -168,17 +168,57 @@ local function install()
 
     local req_ok, to_install = get(Installer.sources.main .. "?" .. Installer.refresh_tac)
     if not req_ok then
-        error("download failed", 0)
+        error("Download failed", 0)
     end
+
+    -- Get the version number of the incoming file
+    if not to_install:match("%-%-@PRODUCT=" .. Installer.product_id .. "@") then
+        -- what product is this anyway?!
+        error("Downloaded file is corrupt", 0)
+    end
+    local version = to_install:match("%-%-@VERSION=(%d+)@")
+    if not version then
+        color_write("WARN: Incoming file has no version, assuming v0", colors.orange)
+        version = 0
+    else
+        version = tonumber(version)
+    end
+
     -- number of exclamation points (!)
     local screaming = 1
+    local do_upgrade = nil
     for _, name in ipairs(fs.list("/startup")) do
+        local full_path = fs.combine("/startup", name)
+        local fileh = fs.open(full_path, "r")
+        if fileh then
+            local exist_content = fileh.readAll()
+            if exist_content and exist_content:match("%-%-@PRODUCT=" .. Installer.product_id .. "@") then
+                -- ooh can we do an upgrade?
+                local exist_version = exist_content:match("%-%-@VERSION=(%d+)@")
+                if not exist_version then
+                    version = 0
+                else
+                    exist_version = tonumber(version)
+                end
+                if version > exist_version then
+                    fs.delete(full_path)
+                    do_upgrade = full_path
+                    color_write("Upgrading " .. name .. ": v" .. exist_version .. " -> " .. version .. "\n", colors.lime)
+                end
+            end
+            fileh.close()
+        end
         local this_sc = #name:match("^(!*)")
         if this_sc + 1 > screaming then
             screaming = this_sc + 1
         end
     end
-    local target_name = "/startup/" .. ("!"):rep(screaming) .. "_" .. Installer.output_name
+    local target_name
+    if do_upgrade then
+        target_name = do_upgrade
+    else
+        target_name = "/startup/" .. ("!"):rep(screaming) .. "_" .. Installer.output_name
+    end
     if fs.exists(target_name) then
         fs.delete(target_name)
     end
@@ -188,7 +228,7 @@ local function install()
     end
     handl.write(to_install)
     handl.close()
-    
+
     color_write("Install success! ", colors.lime)
     color_write("Restart to apply changes.\n", colors.yellow)
 end

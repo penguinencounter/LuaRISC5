@@ -1,3 +1,7 @@
+-- computer readable metadata.
+--@PRODUCT=jumpload_fd5e2d536aa8f095@
+--@VERSION=1@
+
 -- name should sort early.
 local function pname()
     return shell.getRunningProgram():match("[^/]+$")
