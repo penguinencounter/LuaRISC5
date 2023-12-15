@@ -1,5 +1,7 @@
 local Instruction = require "instruction"
 local c = require "compatibility"
+local bits = c.bits
+local bin32 = require "bin32"
 
 -- Instruction encoders decoders.
 
@@ -26,12 +28,12 @@ local InstR = Instruction:new {
 ---Decode an R-type instruction from a word.
 ---@param word integer
 function InstR:decode(word)
-    self.opcode = c.bits.extract(word, 0, 7)
-    self.rd = c.bits.extract(word, 7, 5)
-    self.funct3 = c.bits.extract(word, 12, 3)
-    self.rs1 = c.bits.extract(word, 15, 5)
-    self.rs2 = c.bits.extract(word, 20, 5)
-    self.funct7 = c.bits.extract(word, 25, 7)
+    self.opcode = bits.extract(word, 0, 7)
+    self.rd = bits.extract(word, 7, 5)
+    self.funct3 = bits.extract(word, 12, 3)
+    self.rs1 = bits.extract(word, 15, 5)
+    self.rs2 = bits.extract(word, 20, 5)
+    self.funct7 = bits.extract(word, 25, 7)
 end
 
 
@@ -52,11 +54,11 @@ local InstI = Instruction:new {
 ---Decode an I-type instruction from a word.
 ---@param word integer
 function InstI:decode(word)
-    self.opcode = c.bits.extract(word, 0, 7)
-    self.rd = c.bits.extract(word, 7, 5)
-    self.funct3 = c.bits.extract(word, 12, 3)
-    self.rs1 = c.bits.extract(word, 15, 5)
-    self.imm = c.bits.extract(word, 20, 12)
+    self.opcode = bits.extract(word, 0, 7)
+    self.rd = bits.extract(word, 7, 5)
+    self.funct3 = bits.extract(word, 12, 3)
+    self.rs1 = bits.extract(word, 15, 5)
+    self.imm = bin32.sext(bits.extract(word, 20, 12), 12)
 end
 
 
@@ -77,13 +79,13 @@ local InstS = Instruction:new {
 ---Decode an S-type instruction from a word.
 ---@param word integer
 function InstS:decode(word)
-    self.opcode = c.bits.extract(word, 0, 7)
-    local imm_low = c.bits.extract(word, 7, 5)
-    local imm_high = c.bits.extract(word, 25, 7)
-    self.imm = c.bits.bor(c.bits.lshift(imm_high, 5), imm_low)
-    self.funct3 = c.bits.extract(word, 12, 3)
-    self.rs1 = c.bits.extract(word, 15, 5)
-    self.rs2 = c.bits.extract(word, 20, 5)
+    self.opcode = bits.extract(word, 0, 7)
+    local imm_low = bits.extract(word, 7, 5)
+    local imm_high = bits.extract(word, 25, 7)
+    self.imm = bin32.sext(bits.bor(bits.lshift(imm_high, 5), imm_low), 12)
+    self.funct3 = bits.extract(word, 12, 3)
+    self.rs1 = bits.extract(word, 15, 5)
+    self.rs2 = bits.extract(word, 20, 5)
 end
 
 
@@ -104,15 +106,16 @@ local InstB = Instruction:new {
 ---Decode an B-type instruction from a word.
 ---@param word integer
 function InstB:decode(word)
-    self.opcode = c.bits.extract(word, 0, 7)
-    local imm = c.bits.extract(word, 8, 4)
-    imm = c.bits.bor(imm, c.bits.lshift(c.bits.extract(word, 25, 6), 4))
-    imm = c.bits.bor(imm, c.bits.lshift(c.bits.extract(word, 7, 1), 10))
-    imm = c.bits.bor(imm, c.bits.lshift(c.bits.extract(word, 31, 1), 11))
-    imm = c.bits.lshift(imm, 1) -- there is no low bit.
-    self.funct3 = c.bits.extract(word, 12, 3)
-    self.rs1 = c.bits.extract(word, 15, 5)
-    self.rs2 = c.bits.extract(word, 20, 5)
+    self.opcode = bits.extract(word, 0, 7)
+    local imm = bits.extract(word, 8, 4)
+    imm = bits.bor(imm, bits.lshift(bits.extract(word, 25, 6), 4))
+    imm = bits.bor(imm, bits.lshift(bits.extract(word, 7, 1), 10))
+    imm = bits.bor(imm, bits.lshift(bits.extract(word, 31, 1), 11))
+    imm = bits.lshift(imm, 1) -- there is no low bit.
+    self.imm = bin32.sext(imm, 13)
+    self.funct3 = bits.extract(word, 12, 3)
+    self.rs1 = bits.extract(word, 15, 5)
+    self.rs2 = bits.extract(word, 20, 5)
 end
 
 
@@ -129,7 +132,31 @@ local InstU = Instruction:new {
 ---Decode an U-type instruction from a word.
 ---@param word integer
 function InstU:decode(word)
-    self.opcode = c.bits.extract(word, 0, 7)
-    self.rd = c.bits.extract(word, 7, 5)
-    self.imm = c.bits.lshift(c.bits.extract(word, 12, 20), 12)
+    self.opcode = bits.extract(word, 0, 7)
+    self.rd = bits.extract(word, 7, 5)
+    self.imm = bits.lshift(bits.extract(word, 12, 20), 12)
+end
+
+
+---@class I.InstJ : Instruction
+---@field opcode integer
+---@field rd integer
+---@field imm integer
+local InstJ = Instruction:new {
+    opcode = 0,
+    rd = 0,
+    imm = 0,
+}
+
+---Decode an J-type instruction from a word.
+---@param word integer
+function InstJ:decode(word)
+    self.opcode = bits.extract(word, 0, 7)
+    self.rd = bits.extract(word, 7, 5)
+    local im = bits.extract(word, 21, 10)
+    im = bits.bor(im, bits.lshift(bits.extract(word, 20, 1), 10))
+    im = bits.bor(im, bits.lshift(bits.extract(word, 12, 8), 11))
+    im = bits.bor(im, bits.lshift(bits.extract(word, 31, 1), 19))
+    im = bits.lshift(im, 1) -- there is no low bit.
+    self.imm = bin32.sext(im, 21)
 end
