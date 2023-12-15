@@ -1,5 +1,5 @@
 -- computer readable metadata. do not remove.
---@VERSION=16@
+--@VERSION=17@
 
 local Installer = {
     selfref = "https://penguinencounter.github.io/LuaRISC5/jumpload/install.lua",
@@ -8,7 +8,7 @@ local Installer = {
         ["Pragma"] = "no-cache",
     },
     refresh_tac = math.floor(os.time("utc") * 60 * 60),
-    version = 16, -- ENSURE THIS MATCHES THE HEADER
+    version = 17, -- ENSURE THIS MATCHES THE HEADER
     output_name = "jumpload.lua",
     product_id = "jumpload_fd5e2d536aa8f095",
 
@@ -192,6 +192,7 @@ local function install()
         local full_path = fs.combine("/startup", name)
         local fileh = fs.open(full_path, "r")
         if fileh then
+            local already_closed = false
             local exist_content = fileh.readAll()
             if exist_content and exist_content:match("%-%-@PRODUCT=" .. Installer.product_id .. "@") then
                 -- ooh can we do an upgrade?
@@ -202,16 +203,21 @@ local function install()
                     exist_version = tonumber(exist_version)
                 end
                 if version > exist_version then
+                    fileh.close()
+                    already_closed = true
                     fs.delete(full_path)
                     do_upgrade = full_path
                     color_write("Upgrading " .. name .. ": v" .. exist_version .. " -> " .. version .. "\n", colors.lime)
                 elseif version <= exist_version then
                     color_write("An existing v" .. exist_version .. " is already installed\n", colors.yellow)
                     fileh.close()
+                    already_closed = true
                     return
                 end
             end
-            fileh.close()
+            if not already_closed then
+                fileh.close()
+            end
         end
         local this_sc = #name:match("^(!*)")
         if this_sc + 1 > screaming then
