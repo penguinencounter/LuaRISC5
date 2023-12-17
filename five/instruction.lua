@@ -26,6 +26,7 @@ end
 
 ---Decode an instruction from a word.
 ---@param word integer
+---@return Instruction
 function Instruction:decode(word)
     error(":decode is abstract and no implementation was provided")
 end

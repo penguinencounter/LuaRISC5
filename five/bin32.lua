@@ -36,5 +36,21 @@ function export.twoc2real(value)
     end
 end
 
+---Binary string to integer.
+---@param bstr string
+---@return integer
+function export.binary(bstr)
+    local value = 0
+    for i = 1, #bstr do
+        local ch = bstr:sub(i, i)
+        if ch == "1" then
+            value = c.bits.bor(c.bits.lshift(value, 1), 1)
+        elseif ch == "0" then
+            value = c.bits.lshift(value, 1)
+        end
+    end
+    return value
+end
+
 
 return export
